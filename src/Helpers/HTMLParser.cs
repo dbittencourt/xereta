@@ -4,9 +4,12 @@ namespace xereta.Helpers
 {
     public class HTMLParser : IHTMLParser
     {
-        public IEnumerable<string> Parse(string html)
+        public List<string> Parse(string html)
         {
-            return new List<string>();   
+            var result = new List<string>(); 
+            result.Add("Funcionou");
+            
+            return result;   
         }
     }
 }

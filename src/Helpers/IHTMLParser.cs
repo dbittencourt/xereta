@@ -4,6 +4,6 @@ namespace xereta.Helpers
 {
     public interface IHTMLParser
     {
-        IEnumerable<string> Parse(string html);
+        List<string> Parse(string html);
     }
 }
