@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using xereta.Helpers;
+using xereta.Models;
 
 namespace xereta.Controllers
 {
@@ -11,18 +12,18 @@ namespace xereta.Controllers
     public class ServidoresController : Controller
     {
 
-        IHTMLParser _htmlParser;
+        IDataParser _htmlParser;
         readonly string urlPortalTransparencia = "http://www.portaldatransparencia.gov.br/servidores/Servidor-ListaServidores.asp?bogus=1&Pagina=1&TextoPesquisa=";
         
         
-        public ServidoresController(IHTMLParser htmlParser)
+        public ServidoresController(IDataParser htmlParser)
         {
             this._htmlParser = htmlParser;
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<string> Get(string id)
+        public async Task<List<SearchResult>> Get(string id)
         {
             using (var client = new HttpClient())
             {
@@ -33,7 +34,7 @@ namespace xereta.Controllers
                     string stringResponse = await response.Content.ReadAsStringAsync();
 
                     var result = _htmlParser.Parse(stringResponse);
-                    return result[0];
+                    return result;
                 }
                 catch(HttpRequestException e)
                 {
@@ -41,7 +42,7 @@ namespace xereta.Controllers
                 }
 
             }
-            return "Something not expected happened";
+            return new List<SearchResult>();
         }
        
        /*
