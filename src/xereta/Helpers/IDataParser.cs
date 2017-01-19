@@ -5,6 +5,8 @@ namespace xereta.Helpers
 {
     public interface IDataParser
     {
-        List<SearchResult> Parse(string html);
+        IEnumerable<SearchResult> ParseSearch(string html);
+
+        PublicWorker Parse(string profileHtml, string salaryHtml);
     }
 }

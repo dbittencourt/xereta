@@ -25,13 +25,17 @@ namespace xereta
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IDataParser, HTMLParser>();
-            services.AddMvcCore();
+            services.AddMvcCore().AddJsonFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseMvc();
+            /*app.UseMvc(routes =>
+            routes.MapRoute(
+                name: "default",
+                template: "{controller=servidores}/{action=get}/{id?}"));*/
         }
     }
 }

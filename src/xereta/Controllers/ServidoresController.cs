@@ -13,28 +13,58 @@ namespace xereta.Controllers
     {
 
         IDataParser _htmlParser;
-        readonly string urlPortalTransparencia = "http://www.portaldatransparencia.gov.br/servidores/Servidor-ListaServidores.asp?bogus=1&Pagina=1&TextoPesquisa=";
-        
-        
+        readonly string searchURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-ListaServidores.asp?bogus=1&Pagina=1&TextoPesquisa=";
+        readonly string profileURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-DetalhaServidor.asp?IdServidor=";
+        readonly string profileSalaryURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-DetalhaRemuneracao.asp?Op=1&IdServidor=";
+
         public ServidoresController(IDataParser htmlParser)
         {
             this._htmlParser = htmlParser;
         }
 
-        // GET api/values/5
+        // GET api/servidores/id
         [HttpGet("{id}")]
-        public async Task<List<SearchResult>> Get(string id)
+        public async Task<IActionResult> GetById(string id)
+        {
+            using (var Client = new HttpClient())
+            {
+                try
+                {
+                    var response = await Client.GetAsync(profileURL + id);
+                    response.EnsureSuccessStatusCode();
+                    string profileResponse = await response.Content.ReadAsStringAsync();
+
+                    response = await Client.GetAsync(profileSalaryURL + id);
+                    response.EnsureSuccessStatusCode();
+                    string profileSalaryResponse = await response.Content.ReadAsStringAsync();
+
+                    var result = _htmlParser.Parse(profileResponse, profileSalaryResponse);
+
+                    return Ok(result);
+                }
+                catch(HttpRequestException e)
+                {
+                    Console.WriteLine($"Request exception: {e.Message}");
+                }
+            }
+            
+            return NoContent();
+        }
+
+        // GET api/servidores?q=query
+        [HttpGet]
+        public async Task<IActionResult> Search([FromQuery]string q)
         {
             using (var client = new HttpClient())
             {
                 try
                 {
-                    var response = await client.GetAsync(urlPortalTransparencia + id);
+                    var response = await client.GetAsync(searchURL + q);
                     response.EnsureSuccessStatusCode();
                     string stringResponse = await response.Content.ReadAsStringAsync();
 
-                    var result = _htmlParser.Parse(stringResponse);
-                    return result;
+                    var result = _htmlParser.ParseSearch(stringResponse);
+                    return Ok(result);
                 }
                 catch(HttpRequestException e)
                 {
@@ -42,7 +72,7 @@ namespace xereta.Controllers
                 }
 
             }
-            return new List<SearchResult>();
+            return NoContent();
         }
        
        /*

@@ -6,30 +6,50 @@ namespace xereta.Helpers
 {
     public class HTMLParser : IDataParser
     {
-
-        private readonly string htmlResultId = "listagem";
         AngleSharp.Parser.Html.HtmlParser _htmlParser;
 
         public HTMLParser()
         {
             _htmlParser = new AngleSharp.Parser.Html.HtmlParser();
         } 
-        public List<SearchResult> Parse(string html)
+        public IEnumerable<SearchResult> ParseSearch(string html)
         {
             var table = _htmlParser.Parse(html).QuerySelector(@"table[summary]");        
-            var result = ParseTable(table);
+            var result = ParseSearchTable(table);
 
             return result;   
         }
 
-        private List<SearchResult> ParseTable(IElement table)
+        public PublicWorker Parse(string profileHtml, string salaryHtml)
+        {
+            var table = _htmlParser.Parse(profileHtml).QuerySelector(@"table[summary]");
+            var publicWorker = ParseProfileResult(table);
+
+            return publicWorker;
+        }
+
+        private PublicWorker ParseProfileResult(IElement table)
+        {
+            var publicWorker = new PublicWorker();
+            table.FirstElementChild.RemoveChild(table.FirstElementChild.FirstElementChild);
+
+            publicWorker.CPF = "";
+            publicWorker.Id = "";
+            publicWorker.Name = "";
+            publicWorker.workingDepartment = "";
+            publicWorker.OriginDepartment = "";
+
+            return publicWorker;
+        }
+
+        private IEnumerable<SearchResult> ParseSearchTable(IElement table)
         {
             var result = new List<SearchResult>(); 
             table.FirstElementChild.RemoveChild(table.FirstElementChild.FirstElementChild);
             var childs = table.FirstElementChild.Children;
             foreach(var child in childs)
             {
-                result.Add(ParseResult(child));
+                result.Add(ParseSearchResult(child));
             }
             return result; 
         }
@@ -39,7 +59,7 @@ namespace xereta.Helpers
         /// </summary>
         /// <param name="child">A person retrieved bu the search</param>
         /// <returns></returns>
-        private SearchResult ParseResult(IElement child)
+        private SearchResult ParseSearchResult(IElement child)
         {
             SearchResult result = new SearchResult();
 

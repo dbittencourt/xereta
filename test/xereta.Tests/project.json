@@ -7,6 +7,7 @@
     "System.Runtime.Serialization.Primitives": "4.3.0",
     "xunit": "2.1.0",
     "dotnet-test-xunit": "1.0.0-rc2-192208-24",
+    "Microsoft.DotNet.InternalAbstractions": "1.0.0",
     "xereta": {
       "target": "project"
     }
@@ -21,7 +22,7 @@
         }
       },
       "imports": [
-        "dotnet5.4",
+        "dotnet5.4" ,
         "portable-net451+win8"
       ]
     }
