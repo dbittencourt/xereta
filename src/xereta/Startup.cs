@@ -24,6 +24,7 @@ namespace xereta
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IDataRetriever, HTMLDataRetriever>();
             services.AddSingleton<IDataParser, HTMLParser>();
             services.AddMvcCore().AddJsonFormatters();
         }
@@ -32,10 +33,6 @@ namespace xereta
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseMvc();
-            /*app.UseMvc(routes =>
-            routes.MapRoute(
-                name: "default",
-                template: "{controller=servidores}/{action=get}/{id?}"));*/
         }
     }
 }

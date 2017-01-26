@@ -6,6 +6,6 @@ namespace xereta.Models
         public string Name {get; set;}
         public string CPF {get; set;}
         public string OriginDepartment {get; set;}
-        public string workingDepartment {get; set;}
+        public string WorkingDepartment {get; set;}
     }
 }

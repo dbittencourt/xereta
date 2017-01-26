@@ -36,7 +36,7 @@ namespace xereta.Helpers
             publicWorker.CPF = "";
             publicWorker.Id = "";
             publicWorker.Name = "";
-            publicWorker.workingDepartment = "";
+            publicWorker.WorkingDepartment = "";
             publicWorker.OriginDepartment = "";
 
             return publicWorker;

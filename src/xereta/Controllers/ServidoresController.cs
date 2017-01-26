@@ -12,40 +12,32 @@ namespace xereta.Controllers
     public class ServidoresController : Controller
     {
 
-        IDataParser _htmlParser;
-        readonly string searchURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-ListaServidores.asp?bogus=1&Pagina=1&TextoPesquisa=";
-        readonly string profileURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-DetalhaServidor.asp?IdServidor=";
-        readonly string profileSalaryURL = "http://www.portaldatransparencia.gov.br/servidores/Servidor-DetalhaRemuneracao.asp?Op=1&IdServidor=";
+        IDataParser _dataParser;
+        IDataRetriever _dataRetriever;
+        
 
-        public ServidoresController(IDataParser htmlParser)
+        public ServidoresController(IDataParser dataParser, IDataRetriever dataRetriever)
         {
-            this._htmlParser = htmlParser;
+            this._dataParser = dataParser;
+            this._dataRetriever = dataRetriever;
         }
 
         // GET api/servidores/id
+        // TODO: Implement UserExists filter
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            using (var Client = new HttpClient())
+            try
             {
-                try
-                {
-                    var response = await Client.GetAsync(profileURL + id);
-                    response.EnsureSuccessStatusCode();
-                    string profileResponse = await response.Content.ReadAsStringAsync();
+                string profileInfo = await _dataRetriever.GetProfileAsync(id);
+                string profileSalary = await _dataRetriever.GetProfileSalaryAsync(id);
 
-                    response = await Client.GetAsync(profileSalaryURL + id);
-                    response.EnsureSuccessStatusCode();
-                    string profileSalaryResponse = await response.Content.ReadAsStringAsync();
-
-                    var result = _htmlParser.Parse(profileResponse, profileSalaryResponse);
-
-                    return Ok(result);
-                }
-                catch(HttpRequestException e)
-                {
-                    Console.WriteLine($"Request exception: {e.Message}");
-                }
+                PublicWorker publicWorker = _dataParser.Parse(profileInfo, profileSalary);
+                return Ok(publicWorker);
+            } 
+            catch(HttpRequestException e)
+            {
+                Console.WriteLine($"Request exception: {e.Message}");
             }
             
             return NoContent();
@@ -55,23 +47,17 @@ namespace xereta.Controllers
         [HttpGet]
         public async Task<IActionResult> Search([FromQuery]string q)
         {
-            using (var client = new HttpClient())
+            try
             {
-                try
-                {
-                    var response = await client.GetAsync(searchURL + q);
-                    response.EnsureSuccessStatusCode();
-                    string stringResponse = await response.Content.ReadAsStringAsync();
-
-                    var result = _htmlParser.ParseSearch(stringResponse);
-                    return Ok(result);
-                }
-                catch(HttpRequestException e)
-                {
-                    Console.WriteLine($"Request exception: {e.Message}");
-                }
-
+                string searchTextResult = await _dataRetriever.SearchAsync(q);
+                var searchResult = _dataParser.ParseSearch(searchTextResult);
+                return Ok(searchResult);
+            } 
+            catch(HttpRequestException e)
+            {
+                Console.WriteLine($"Request exception: {e.Message}");
             }
+            
             return NoContent();
         }
        
