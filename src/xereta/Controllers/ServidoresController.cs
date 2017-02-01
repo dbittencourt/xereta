@@ -11,12 +11,11 @@ namespace xereta.Controllers
     [Route("api/[controller]")]
     public class ServidoresController : Controller
     {
-
         IDataParser _dataParser;
-        IDataRetriever _dataRetriever;
-        
+        IDataRetriever _dataRetriever;   
+        IRepository<PublicWorker> _repository;
 
-        public ServidoresController(IDataParser dataParser, IDataRetriever dataRetriever)
+        public ServidoresController(IDataParser dataParser, IDataRetriever dataRetriever, IRepository<PublicWorker> _repository)
         {
             this._dataParser = dataParser;
             this._dataRetriever = dataRetriever;
@@ -25,22 +24,29 @@ namespace xereta.Controllers
         // GET api/servidores/id
         // TODO: Implement UserExists filter
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(string id, int number = 5)
         {
             try
             {
                 string profileInfo = await _dataRetriever.GetProfileAsync(id);
-                string profileSalary = await _dataRetriever.GetProfileSalaryAsync(id);
-
-                PublicWorker publicWorker = _dataParser.Parse(profileInfo, profileSalary);
-                return Ok(publicWorker);
+                if (!profileInfo.Equals(string.Empty))
+                {
+                    IEnumerable<string> profileSalary = await _dataRetriever.GetProfileSalaryAsync(id, number);
+                    PublicWorker publicWorker = _dataParser.Parse(profileInfo, profileSalary);
+                    publicWorker.Id = id;
+                    return Ok(publicWorker);
+                }
+                else
+                {
+                    return NotFound(id);
+                }
             } 
             catch(HttpRequestException e)
             {
                 Console.WriteLine($"Request exception: {e.Message}");
             }
             
-            return NoContent();
+            return NotFound(id);
         }
 
         // GET api/servidores?q=query

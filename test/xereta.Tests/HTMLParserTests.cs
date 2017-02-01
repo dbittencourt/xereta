@@ -29,6 +29,12 @@ namespace xereta.Tests
                 CPF = "123456789", Id = "id1", Name = "PublicWorker", 
                 OriginDepartment = "OriginDepartment", WorkingDepartment = "WorkingDepartment"
             };
+            publicWorker.Salaries = new Dictionary<string, float>();
+            publicWorker.Salaries.Add("2016-Novembro", 10000);
+            publicWorker.Salaries.Add("2016-Outubro", 10000);
+            publicWorker.Salaries.Add("2016-Setembro", 10000);
+            publicWorker.Salaries.Add("2016-Agosto", 10000);
+            publicWorker.Salaries.Add("2016-Julho", 10000);
         }
         
         [Fact]
@@ -42,8 +48,8 @@ namespace xereta.Tests
         [Fact]
         public void Parse_CorrectId_ReturnsPublicWorker()
         {
-            _dataParser.Setup(parser => parser.Parse("","")).Returns(publicWorker);
-            var result = _dataParser.Object.Parse("", "");
+            _dataParser.Setup(parser => parser.Parse("",new List<string>())).Returns(publicWorker);
+            var result = _dataParser.Object.Parse("", new List<string>());
             Assert.Equal(publicWorker, result);
         }
     }

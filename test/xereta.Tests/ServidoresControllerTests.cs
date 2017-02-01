@@ -16,6 +16,7 @@ namespace xereta.Tests
         Mock<IDataRetriever> _dataRetriever;
         ServidoresController _controller;
         IEnumerable<SearchResult> searchResults; 
+        PublicWorker publicWorker;
 
         public ServidoresControllerTests()
         {
@@ -27,10 +28,21 @@ namespace xereta.Tests
                 new SearchResult { CPF = "012345678", Name = "Result3", Id = "id3", 
                 OriginDepartment = "originDepartment", WorkingDepartment = "workingDepartment" }
             };
+
+            publicWorker = new PublicWorker() {
+                CPF = "123456789", Id = "id1", Name = "PublicWorker", 
+                OriginDepartment = "OriginDepartment", WorkingDepartment = "WorkingDepartment"
+            };
+            publicWorker.Salaries = new Dictionary<string, float>();
+            publicWorker.Salaries.Add("2016-Novembro", 10000);
+            publicWorker.Salaries.Add("2016-Outubro", 10000);
+            publicWorker.Salaries.Add("2016-Setembro", 10000);
+            publicWorker.Salaries.Add("2016-Agosto", 10000);
+            publicWorker.Salaries.Add("2016-Julho", 10000);
         }
 
         [Fact]
-        public async Task Search_ReturnsOkObjectResult_WithAListOfSearchResults() 
+        public async Task Search_CorrectQuery_ReturnsListOfSearchResults() 
         {
             _dataRetriever = new Mock<IDataRetriever>();
             _dataRetriever.Setup(retriever => retriever.SearchAsync("")).Returns(Task.FromResult(""));
@@ -48,9 +60,41 @@ namespace xereta.Tests
         } 
 
         [Fact]
-        public async Task GetById_ReturnsOkObjectResult_WithAPublicWorker()
+        public async Task GetById_CorrectId_ReturnsPublicWorker()
         {
-            throw new NotImplementedException();
+            
+            IEnumerable<string> test = new List<string>{"test"};
+            _dataRetriever = new Mock<IDataRetriever>();
+            _dataRetriever.Setup(retriever => retriever.GetProfileAsync("1")).Returns(Task.FromResult("test"));
+            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("1", 5)).Returns(Task.FromResult(test));
+            
+            _dataParser = new Mock<IDataParser>();
+            _dataParser.Setup(parser => parser.Parse("test", test)).Returns(publicWorker);
+
+            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object);
+            var result = await _controller.GetById("1");
+
+            Assert.NotNull(result);
+            var methodResult = Assert.IsType<OkObjectResult>(result);
+            var model = Assert.IsAssignableFrom<PublicWorker>(methodResult.Value);
+        }
+
+        [Fact]
+        public async Task GetById_IncorrectId_ReturnsNotFound()
+        {
+            IEnumerable<string> test = new List<string>{"test"};
+            _dataRetriever = new Mock<IDataRetriever>();
+            _dataRetriever.Setup(retriever => retriever.GetProfileAsync("")).Returns(Task.FromResult(""));
+            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("", 5)).Returns(Task.FromResult(test));
+            
+            _dataParser = new Mock<IDataParser>();
+            _dataParser.Setup(parser => parser.Parse("", test)).Returns(publicWorker);
+
+            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object);
+            var result = await _controller.GetById("");
+
+            Assert.NotNull(result);
+            var methodResult = Assert.IsType<NotFoundResult>(result);
         }
     }
 }

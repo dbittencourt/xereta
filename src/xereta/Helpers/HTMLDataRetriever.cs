@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -46,29 +47,37 @@ namespace xereta.Helpers
             }
             catch(HttpRequestException e)
             {
-                Console.WriteLine($"Request exception: {e.Message}");
+                Console.WriteLine($"It wasn't possible to retrieve the profile.\nRequest exception: {e.Message}");
             }
             return "";
             
         }
 
-        public async Task<string> GetProfileSalaryAsync(string id)
+        public async Task<IEnumerable<string>> GetProfileSalaryAsync(string id, int numberOfSalaries)
         {
+
+            List<string> salariesHtml = new List<string>();
             try
             {
                 using (var client = new HttpClient())
                 {
-                    var response = await client.GetAsync(profileSalaryURL + id);
-                    response.EnsureSuccessStatusCode();
-                    string profileResponse = await response.Content.ReadAsStringAsync();
-                    return profileResponse;
+                    DateTime lastSalaryDate = DateTime.Now.AddMonths(-1);
+                    for (int i = 0; i < numberOfSalaries; i++)
+                    {
+                        lastSalaryDate = lastSalaryDate.AddMonths(-1);
+                        var response = await client.GetAsync(profileSalaryURL + id + "&Ano=" + lastSalaryDate.Year + "&Mes=" + lastSalaryDate.Month);
+                        response.EnsureSuccessStatusCode();
+                        string profileResponse = await response.Content.ReadAsStringAsync();
+                        salariesHtml.Add(profileResponse);
+                    }
+                    return salariesHtml;
                 }
             }
             catch(HttpRequestException e)
             {
-                Console.WriteLine($"Request exception: {e.Message}");
+                Console.WriteLine($"It wasn't possible to retrieve the profile salary.\nRequest exception: {e.Message}");
             }
-            return "";
+            return salariesHtml;
         }
     }
 }

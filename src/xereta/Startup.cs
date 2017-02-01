@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using xereta.Data;
 using xereta.Helpers;
+using xereta.Models;
 
 namespace xereta
 {
@@ -26,6 +28,9 @@ namespace xereta
         {
             services.AddSingleton<IDataRetriever, HTMLDataRetriever>();
             services.AddSingleton<IDataParser, HTMLParser>();
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+            services.AddEntityFrameworkSqlite();
+            services.AddDbContext<ApplicationDbContext>();
             services.AddMvcCore().AddJsonFormatters();
         }
 
