@@ -2,7 +2,7 @@ namespace xereta.Models
 {
     public class BaseEntity 
     {
-        public string Id {get; set;}
+        public virtual string Id {get; set;}
 
     }
 }

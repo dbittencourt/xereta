@@ -2,28 +2,44 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using xereta.Data;
 
 namespace xereta.Models
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {
-        private readonly DbContext context;
+        private readonly ApplicationDbContext context;
         private DbSet<T> entities;
 
-        public Repository(DbContext context)
+        public Repository(ApplicationDbContext context)
         {
             this.context = context;
             entities = context.Set<T>();
         }
 
-        public async void AddAsync(T entity)
+        public async Task AddAsync(T entity)
         {
             if (entity == null)
-            {
                 throw new ArgumentNullException("entity");
-            }
+
                 await entities.AddAsync(entity);
                 await context.SaveChangesAsync();
+        }
+
+        public async Task AddRangeAsync(IEnumerable<T> newEntities)
+        {
+            try
+            {
+                if (newEntities == null)
+                throw new ArgumentException("entity");
+                    
+                await entities.AddRangeAsync(newEntities);
+                await context.SaveChangesAsync();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         public async Task<T> GetAsync(string id)
@@ -31,28 +47,30 @@ namespace xereta.Models
             return await entities.SingleOrDefaultAsync(e => e.Id == id);  
         }
 
-        public IEnumerable<T> GetAll()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return entities;
+            return await Task.FromResult(entities.ToListAsync() as IEnumerable<T>);
         }
 
-        public async void UpdateAsync(T entity)
+        public async Task<IEnumerable<T>> GetAllWithIdAsync(string id)
+        {
+            return (await entities.ToListAsync()).FindAll(entity => entity.Id.Equals(id));
+        }
+
+        public async Task UpdateAsync(T entity)
         {
             if (entity == null)
-            {
                 throw new ArgumentNullException("entity");
-            }
 
             entities.Update(entity);
             await context.SaveChangesAsync();
         }
 
-        public async void DeleteAsync(T entity)
+        public async Task DeleteAsync(T entity)
         {
             if (entity == null)
-            {
                 throw new ArgumentNullException("entity");
-            }
+            
             entities.Remove(entity);
             await context.SaveChangesAsync();
         } 

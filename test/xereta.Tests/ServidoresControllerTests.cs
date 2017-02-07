@@ -14,31 +14,40 @@ namespace xereta.Tests
     {
         Mock<IDataParser> _dataParser;
         Mock<IDataRetriever> _dataRetriever;
+        Mock<IRepository<PublicWorker>> _publicWorkersRepository;
+        Mock<IRepository<Salary>> _salariesRepository;
         ServidoresController _controller;
-        IEnumerable<SearchResult> searchResults; 
+        IEnumerable<PublicWorker> searchResults; 
         PublicWorker publicWorker;
 
         public ServidoresControllerTests()
         {
-            searchResults = new List<SearchResult> {
-                new SearchResult { CPF = "123456789", Name = "Result1", Id = "id1", 
+            searchResults = new List<PublicWorker> {
+                new PublicWorker { CPF = "123456789", Name = "Result1", Id = "id1", LastUpdate = DateTime.Now,
                 OriginDepartment = "originDepartment", WorkingDepartment = "workingDepartment" },
-                new SearchResult { CPF = "987654321", Name = "Result2", Id = "id2", 
+                new PublicWorker { CPF = "987654321", Name = "Result2", Id = "id2", LastUpdate = DateTime.Now,
                 OriginDepartment = "originDepartment", WorkingDepartment = "workingDepartment" },
-                new SearchResult { CPF = "012345678", Name = "Result3", Id = "id3", 
+                new PublicWorker { CPF = "012345678", Name = "Result3", Id = "id3", LastUpdate = DateTime.Now,
                 OriginDepartment = "originDepartment", WorkingDepartment = "workingDepartment" }
             };
 
             publicWorker = new PublicWorker() {
-                CPF = "123456789", Id = "id1", Name = "PublicWorker", 
-                OriginDepartment = "OriginDepartment", WorkingDepartment = "WorkingDepartment"
+                CPF = "123456789", Id = "id1", Name = "PublicWorker", LastUpdate = DateTime.Now,
+                OriginDepartment = "OriginDepartment", WorkingDepartment = "WorkingDepartment",
+                Salaries = new List<Salary>()
             };
-            publicWorker.Salaries = new Dictionary<string, float>();
-            publicWorker.Salaries.Add("2016-Novembro", 10000);
-            publicWorker.Salaries.Add("2016-Outubro", 10000);
-            publicWorker.Salaries.Add("2016-Setembro", 10000);
-            publicWorker.Salaries.Add("2016-Agosto", 10000);
-            publicWorker.Salaries.Add("2016-Julho", 10000);
+            
+            (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 11, Income = 10000});
+            (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 10, Income = 10000});
+            (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 9, Income = 10000});
+            (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 8, Income = 10000});
+            (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 7, Income = 10000});
+            
+            _publicWorkersRepository = new Mock<IRepository<PublicWorker>>();
+            _publicWorkersRepository.Setup(rep => rep.GetAsync("id1")).Returns(Task.FromResult(publicWorker));
+            _salariesRepository = new Mock<IRepository<Salary>>();
+            _salariesRepository.Setup(rep => rep.GetAllWithIdAsync("id1")).Returns(Task.FromResult(publicWorker.Salaries));
+
         }
 
         [Fact]
@@ -50,12 +59,14 @@ namespace xereta.Tests
              _dataParser = new Mock<IDataParser>();
             _dataParser.Setup(parser => parser.ParseSearch("")).Returns(searchResults);
 
-            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object);
+            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object,
+                                _publicWorkersRepository.Object, _salariesRepository.Object);
+                                
             var result = await _controller.Search("");
 
             Assert.NotNull(result);
             var methodResult = Assert.IsType<OkObjectResult>(result);
-            var model = Assert.IsAssignableFrom<IEnumerable<SearchResult>>(methodResult.Value);
+            var model = Assert.IsAssignableFrom<IEnumerable<PublicWorker>>(methodResult.Value);
             Assert.Equal(searchResults, model);
         } 
 
@@ -69,9 +80,11 @@ namespace xereta.Tests
             _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("1", 5)).Returns(Task.FromResult(test));
             
             _dataParser = new Mock<IDataParser>();
-            _dataParser.Setup(parser => parser.Parse("test", test)).Returns(publicWorker);
+            _dataParser.Setup(parser => parser.Parse("1", "test", test)).Returns(publicWorker);
 
-            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object);
+            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object, 
+                                _publicWorkersRepository.Object, _salariesRepository.Object);
+
             var result = await _controller.GetById("1");
 
             Assert.NotNull(result);
@@ -88,13 +101,15 @@ namespace xereta.Tests
             _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("", 5)).Returns(Task.FromResult(test));
             
             _dataParser = new Mock<IDataParser>();
-            _dataParser.Setup(parser => parser.Parse("", test)).Returns(publicWorker);
+            _dataParser.Setup(parser => parser.Parse("","", test)).Returns(publicWorker);
 
-            _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object);
+             _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object, 
+                                _publicWorkersRepository.Object, _salariesRepository.Object);
+
             var result = await _controller.GetById("");
 
             Assert.NotNull(result);
-            var methodResult = Assert.IsType<NotFoundResult>(result);
+            var methodResult = Assert.IsType<NotFoundObjectResult>(result);
         }
     }
 }

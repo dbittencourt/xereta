@@ -8,6 +8,12 @@ namespace xereta.Helpers
 {
     public class HTMLParser : IDataParser
     {
+
+        private Dictionary<string, int> Months = new Dictionary<string, int>() {
+            {"Janeiro", 1}, {"Fevereiro", 2}, {"Março", 3}, {"Abril", 4},
+            {"Maio",  5}, {"Junho", 6}, {"Julho", 7}, {"Agosto", 8},
+            {"Setembro", 9}, {"Outubro", 10},{"Novembro", 11},{"Dezembro", 12}};
+
         AngleSharp.Parser.Html.HtmlParser _htmlParser;
 
         public HTMLParser()
@@ -22,13 +28,14 @@ namespace xereta.Helpers
             return result;   
         }
 
-        public PublicWorker Parse(string profileHtml, IEnumerable<string> salariesHtml)
+        public PublicWorker Parse(string id, string profileHtml, IEnumerable<string> salariesHtml)
         {
             var publicWorker = new PublicWorker();
+            publicWorker.Id = id;
             var profileDoc = _htmlParser.Parse(profileHtml);
             ParseProfileResult(publicWorker, profileDoc);
 
-            publicWorker.Salaries = new Dictionary<string, float>();
+            publicWorker.Salaries = new List<Salary>();
 
             foreach(string salaryHtml in salariesHtml)
             {
@@ -48,6 +55,8 @@ namespace xereta.Helpers
             publicWorker.WorkingDepartment = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > strong").TextContent);
             publicWorker.OriginDepartment = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(9) > td:nth-child(2) > strong").TextContent);
             publicWorker.Role = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td:nth-child(2) > strong").TextContent);
+            if (publicWorker.Role.Equals(string.Empty))
+                publicWorker.Role = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2) > strong").TextContent);
         }
 
         private void ParseSalaryProfileResult(PublicWorker publicWorker, IHtmlDocument salaryDoc)
@@ -64,7 +73,11 @@ namespace xereta.Helpers
                 sum += val;
             }
             
-            publicWorker.Salaries.Add(year + "-" + month, sum);        
+            if (sum > 0)
+            {
+                Salary sal = new Salary() {Id = publicWorker.Id, Year = int.Parse(year), Month = Months[month], Income = sum};
+                (publicWorker.Salaries as List<Salary>).Add(sal);   
+            }     
         }
 
         private IEnumerable<PublicWorker> ParseSearchTable(IElement table)

@@ -7,6 +7,6 @@ namespace xereta.Helpers
     {
         IEnumerable<PublicWorker> ParseSearch(string searchResult);
 
-        PublicWorker Parse(string profileInformation, IEnumerable<string> salaryInformation);
+        PublicWorker Parse(string id, string profileInformation, IEnumerable<string> salaryInformation);
     }
 }

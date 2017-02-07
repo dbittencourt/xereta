@@ -5,15 +5,19 @@ namespace xereta.Models
 {
     public interface IRepository<T> where T : BaseEntity
     {
-        void AddAsync(T entity);
+        Task AddAsync(T entity);
         
+        Task AddRangeAsync(IEnumerable<T> entities);
+
         Task<T> GetAsync(string id);
 
-        IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAllAsync();
 
-        void UpdateAsync(T entity);
+        Task<IEnumerable<T>> GetAllWithIdAsync(string id);
 
-        void DeleteAsync(T entity);
+        Task UpdateAsync(T entity);
+
+        Task DeleteAsync(T entity);
     }
 
 }
