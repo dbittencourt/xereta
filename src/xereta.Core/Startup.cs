@@ -38,6 +38,7 @@ namespace xereta.Core
                 options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
             });
 
+            services.AddCors();
             services.AddSingleton<IDataRetriever, HTMLDataRetriever>();
             services.AddSingleton<IDataParser, HTMLParser>();
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
@@ -50,6 +51,8 @@ namespace xereta.Core
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseResponseCompression();
+            app.UseCors(builder => 
+                builder.AllowAnyOrigin());
             app.UseMvc();
         }
     }
