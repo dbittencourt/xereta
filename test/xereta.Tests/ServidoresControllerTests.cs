@@ -1,8 +1,8 @@
 ﻿using Xunit;
 using Moq;
-using xereta.Controllers;
-using xereta.Helpers;
-using xereta.Models;
+using xereta.Core.Controllers;
+using xereta.Core.Helpers;
+using xereta.Core.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -44,9 +44,9 @@ namespace xereta.Tests
             (publicWorker.Salaries as List<Salary>).Add(new Salary(){Id = "id1", Year = 2016, Month = 7, Income = 10000});
             
             _publicWorkersRepository = new Mock<IRepository<PublicWorker>>();
-            _publicWorkersRepository.Setup(rep => rep.GetAsync("id1")).Returns(Task.FromResult(publicWorker));
+            _publicWorkersRepository.Setup(rep => rep.GetAsync(It.IsAny<string>())).Returns(Task.FromResult(publicWorker));
             _salariesRepository = new Mock<IRepository<Salary>>();
-            _salariesRepository.Setup(rep => rep.GetAllWithIdAsync("id1")).Returns(Task.FromResult(publicWorker.Salaries));
+            _salariesRepository.Setup(rep => rep.GetAllWithIdAsync(It.IsAny<string>())).Returns(Task.FromResult(publicWorker.Salaries));
 
         }
 
@@ -54,15 +54,15 @@ namespace xereta.Tests
         public async Task Search_CorrectQuery_ReturnsListOfSearchResults() 
         {
             _dataRetriever = new Mock<IDataRetriever>();
-            _dataRetriever.Setup(retriever => retriever.SearchAsync("")).Returns(Task.FromResult(""));
+            _dataRetriever.Setup(retriever => retriever.SearchAsync(It.IsAny<string>())).Returns(Task.FromResult(""));
 
              _dataParser = new Mock<IDataParser>();
-            _dataParser.Setup(parser => parser.ParseSearch("")).Returns(searchResults);
+            _dataParser.Setup(parser => parser.ParseSearch(It.IsAny<string>())).Returns(searchResults);
 
             _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object,
                                 _publicWorkersRepository.Object, _salariesRepository.Object);
                                 
-            var result = await _controller.Search("");
+            var result = await _controller.Search("query");
 
             Assert.NotNull(result);
             var methodResult = Assert.IsType<OkObjectResult>(result);

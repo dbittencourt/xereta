@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Moq;
-using xereta.Helpers;
-using xereta.Models;
+using xereta.Core.Helpers;
+using xereta.Core.Models;
 using Xunit;
 
 namespace xereta.Tests
@@ -42,16 +42,18 @@ namespace xereta.Tests
         [Fact]
         public void ParseSearch_CorrectQuery_ReturnsSearchResult()
         {
-            _dataParser.Setup(parser => parser.ParseSearch("")).Returns(searchResults);
-            var result = _dataParser.Object.ParseSearch("");
+            _dataParser.Setup(parser => parser.ParseSearch(It.IsAny<string>())).Returns(searchResults);
+            var result = _dataParser.Object.ParseSearch("query");
             Assert.Equal(searchResults, result);
         }
 
         [Fact]
         public void Parse_CorrectId_ReturnsPublicWorker()
         {
-            _dataParser.Setup(parser => parser.Parse("1", "",new List<string>())).Returns(publicWorker);
-            var result = _dataParser.Object.Parse("1", "", new List<string>());
+            _dataParser.Setup(parser => parser.Parse(It.IsAny<string>(), It.IsAny<string>(),It.IsAny<List<string>>()))
+                    .Returns(publicWorker);
+
+            var result = _dataParser.Object.Parse("id", "info", new List<string>());
             Assert.Equal(publicWorker, result);
         }
     }
