@@ -35,7 +35,7 @@ namespace xereta.Core
             {
                 options.Providers.Add<GzipCompressionProvider>();
                 options.EnableForHttps = true;
-                options.MimeTypes = ResponseCompressionDefaults;
+                options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
             });
 
             services.AddSingleton<IDataRetriever, HTMLDataRetriever>();
