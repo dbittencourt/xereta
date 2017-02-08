@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace xereta.Models
+namespace xereta.Core.Models
 {
     public interface IRepository<T> where T : BaseEntity
     {

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace xereta.Models
+namespace xereta.Core.Models
 {
     public class Salary : BaseEntity
     {

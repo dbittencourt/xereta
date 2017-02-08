@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace xereta.Helpers
+namespace xereta.Core.Helpers
 {
     public class HTMLDataRetriever : IDataRetriever
     {

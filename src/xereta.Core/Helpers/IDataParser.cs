@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using xereta.Models;
+using xereta.Core.Models;
 
-namespace xereta.Helpers
+namespace xereta.Core.Helpers
 {
     public interface IDataParser
     {

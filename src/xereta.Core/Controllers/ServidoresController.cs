@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using xereta.Helpers;
-using xereta.Models;
+using xereta.Core.Helpers;
+using xereta.Core.Models;
 
-namespace xereta.Controllers
+namespace xereta.Core.Controllers
 {
     [Route("api/[controller]")]
     public class ServidoresController : Controller

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace xereta.Models
+namespace xereta.Core.Models
 {
     public class PublicWorker : BaseEntity
     {   

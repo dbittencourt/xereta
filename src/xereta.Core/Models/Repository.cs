@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using xereta.Data;
+using xereta.Core.Data;
 
-namespace xereta.Models
+namespace xereta.Core.Models
 {
     public class Repository<T> : IRepository<T> where T : BaseEntity
     {

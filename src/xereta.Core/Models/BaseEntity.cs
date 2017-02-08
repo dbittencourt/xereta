@@ -1,4 +1,4 @@
-namespace xereta.Models
+namespace xereta.Core.Models
 {
     public class BaseEntity 
     {

@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using AngleSharp.Dom;
 using AngleSharp.Dom.Html;
-using xereta.Models;
+using xereta.Core.Models;
 
-namespace xereta.Helpers
+namespace xereta.Core.Helpers
 {
     public class HTMLParser : IDataParser
     {

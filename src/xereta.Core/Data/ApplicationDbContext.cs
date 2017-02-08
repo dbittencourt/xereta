@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using xereta.Models;
+using xereta.Core.Models;
 
-namespace xereta.Data
+namespace xereta.Core.Data
 {
     public class ApplicationDbContext : DbContext
     {
