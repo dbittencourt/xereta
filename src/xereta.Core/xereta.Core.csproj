@@ -4,10 +4,8 @@
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
     <AssemblyName>xereta.Core</AssemblyName>
-    <OutputType>Exe</OutputType>
     <PackageId>xereta.Core</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
-    <EnableDefaultContentItems>false</EnableDefaultContentItems>
   </PropertyGroup>
 
   <ItemGroup>

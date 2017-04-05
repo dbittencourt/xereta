@@ -1,5 +1,4 @@
 using System.IO.Compression;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -44,7 +43,7 @@ namespace xereta.Core
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddEntityFrameworkSqlite();
             services.AddDbContext<ApplicationDbContext>();
-            services.AddMvcCore();
+            services.AddMvcCore().AddJsonFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

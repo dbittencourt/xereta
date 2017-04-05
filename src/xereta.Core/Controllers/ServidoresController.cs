@@ -13,6 +13,7 @@ namespace xereta.Core.Controllers
     {
         IDataParser _dataParser;
         IDataRetriever _dataRetriever;   
+        //TODO: Implement a repository with decorators for each entity
         IRepository<PublicWorker> _publicWorkersRepository;
         IRepository<Salary> _salariesRepository;
 

@@ -76,8 +76,8 @@ namespace xereta.Tests
             
             IEnumerable<string> test = new List<string>{"test"};
             _dataRetriever = new Mock<IDataRetriever>();
-            _dataRetriever.Setup(retriever => retriever.GetProfileAsync("1")).Returns(Task.FromResult("test"));
-            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("1", 5)).Returns(Task.FromResult(test));
+            _dataRetriever.Setup(retriever => retriever.GetProfileAsync(It.IsAny<string>())).Returns(Task.FromResult(""));
+            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync(It.IsAny<String>(), 5)).Returns(Task.FromResult(test));
             
             _dataParser = new Mock<IDataParser>();
             _dataParser.Setup(parser => parser.Parse("1", "test", test)).Returns(publicWorker);
@@ -95,18 +95,20 @@ namespace xereta.Tests
         [Fact]
         public async Task GetById_IncorrectId_ReturnsNotFound()
         {
-            IEnumerable<string> test = new List<string>{"test"};
+            string wrongId = "wrongId";
+            IEnumerable<string> test = new List<string>();
             _dataRetriever = new Mock<IDataRetriever>();
-            _dataRetriever.Setup(retriever => retriever.GetProfileAsync("")).Returns(Task.FromResult(""));
-            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync("", 5)).Returns(Task.FromResult(test));
-            
+            _dataRetriever.Setup(retriever => retriever.GetProfileAsync(wrongId)).Returns(Task.FromResult(""));
+            _dataRetriever.Setup(retriever => retriever.GetProfileSalaryAsync(wrongId, 5)).Returns(Task.FromResult(test));
             _dataParser = new Mock<IDataParser>();
-            _dataParser.Setup(parser => parser.Parse("","", test)).Returns(publicWorker);
+            _dataParser.Setup(parser => parser.Parse(wrongId,"", test)).Returns((PublicWorker) null);
+            _publicWorkersRepository.Setup(rep => rep.GetAsync(wrongId)).Returns(Task.FromResult((PublicWorker) null));
+            _salariesRepository.Setup(rep => rep.GetAllWithIdAsync(It.IsAny<string>())).Returns(Task.FromResult((IEnumerable<Salary>)null));
 
              _controller = new ServidoresController(_dataParser.Object, _dataRetriever.Object, 
                                 _publicWorkersRepository.Object, _salariesRepository.Object);
 
-            var result = await _controller.GetById("");
+            var result = await _controller.GetById(wrongId);
 
             Assert.NotNull(result);
             var methodResult = Assert.IsType<NotFoundObjectResult>(result);

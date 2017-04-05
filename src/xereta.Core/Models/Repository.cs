@@ -44,17 +44,17 @@ namespace xereta.Core.Models
 
         public async Task<T> GetAsync(string id)
         {
-            return await entities.SingleOrDefaultAsync(e => e.Id == id);  
+            return await entities.AsNoTracking().SingleOrDefaultAsync(e => e.Id == id);  
         }
 
         public async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await Task.FromResult(entities.ToListAsync() as IEnumerable<T>);
+            return await Task.FromResult(entities.AsNoTracking().ToListAsync() as IEnumerable<T>);
         }
 
         public async Task<IEnumerable<T>> GetAllWithIdAsync(string id)
         {
-            return (await entities.ToListAsync()).FindAll(entity => entity.Id.Equals(id));
+            return (await entities.AsNoTracking().ToListAsync()).FindAll(entity => entity.Id.Equals(id));
         }
 
         public async Task UpdateAsync(T entity)

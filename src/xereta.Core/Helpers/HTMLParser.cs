@@ -52,8 +52,15 @@ namespace xereta.Core.Helpers
             publicWorker.Name = BeautifyString(doc.QuerySelector("#resumo > table > tbody > tr:nth-child(1) > td.colunaValor").TextContent);
             publicWorker.CPF = BeautifyString(doc.QuerySelector("#resumo > table > tbody > tr:nth-child(2) > td.colunaValor").TextContent);
             publicWorker.SIAPE = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(1) > td:nth-child(2) > strong").TextContent);
-            publicWorker.WorkingDepartment = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > strong").TextContent);
-            publicWorker.OriginDepartment = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(9) > td:nth-child(2) > strong").TextContent);
+            
+            var workingDepartment = doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(14) > td:nth-child(2) > strong");
+            if (workingDepartment != null)
+                publicWorker.WorkingDepartment = BeautifyString(workingDepartment.TextContent);
+            
+            var originDepartment = doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(9) > td:nth-child(2) > strong");
+            if (originDepartment != null)
+                publicWorker.OriginDepartment = BeautifyString(originDepartment.TextContent);
+            
             publicWorker.Role = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td > table > tbody > tr:nth-child(2) > td:nth-child(2) > strong").TextContent);
             if (publicWorker.Role.Equals(string.Empty))
                 publicWorker.Role = BeautifyString(doc.QuerySelector("#listagemConvenios > table > tbody > tr > td:nth-child(3) > table > tbody > tr:nth-child(2) > td:nth-child(2) > strong").TextContent);

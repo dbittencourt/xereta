@@ -1,59 +1,63 @@
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Http;
-using React.AspNet;
+using Microsoft.AspNetCore.SpaServices.Webpack;
 
-namespace xereta.Web
+namespace MvcApp
 {
     public class Startup
     {
+        public Startup(IHostingEnvironment env)
+        {
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();  
-            // react.js 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddReact();
+            // Add framework services.
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+            loggerFactory.AddDebug();
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                /*app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions {
+                    HotModuleReplacement = true,
+                    ReactHotModuleReplacement = true
+                });*/
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
             }
 
             app.UseStaticFiles();
-            app.UseReact(config =>
-            {
-                // If you want to use server-side rendering of React components,
-                // add all the necessary JavaScript files here. This includes
-                // your components as well as all of their dependencies.
-                // See http://reactjs.net/ for more information. Example:
-                //config
-                //  .AddScript("~/Scripts/First.jsx")
-                //  .AddScript("~/Scripts/Second.jsx");
 
-                // If you use an external build too (for example, Babel, Webpack,
-                // Browserify or Gulp), you can improve performance by disabling
-                // ReactJS.NET's version of Babel and loading the pre-transpiled
-                // scripts. Example:
-                //config
-                //  .SetLoadBabel(false)
-                //  .AddScriptWithoutTransform("~/Scripts/bundle.server.js");
-            });
-            app.UseMvc(routes => 
+            app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                  name: "default",
-                  template: "{controller=home}/{action=index}/{id?}"  
-                );
+                    name: "default",
+                    template: "{controller=Home}/{action=Index}/{id?}");
+
+                routes.MapSpaFallbackRoute(
+                    name: "spa-fallback",
+                    defaults: new { controller = "Home", action = "Index" });
             });
         }
     }
