@@ -1,14 +1,16 @@
 import * as React from 'react';
 import 'isomorphic-fetch';
 import { PublicWorker, PublicWorkerData } from './PublicWorker';
+import { Button, Input, Table, Spin } from 'antd';
 
 
 interface SearchDataState {
-    query: string,
-    searchResult: PublicWorkerData[],
-    publicWorkers: PublicWorkerData[],
-    loading: boolean,
-    individualProfile: boolean
+    query?: string,
+    searchResult?: PublicWorkerData[],
+    publicWorkers?: PublicWorkerData[],
+    loading?: boolean,
+    individualProfile?: boolean,
+    publicWorkerDisplayed?: PublicWorkerData
 }
 
 class SearchBar extends React.Component<any, void>{
@@ -18,13 +20,12 @@ class SearchBar extends React.Component<any, void>{
     }
 
     public render(){
-        return  <div>
-                    <label>Nome ou CPF: 
-                        <input type='text' placeholder="Search..." value={this.props.query} 
-                        onChange={this.handleChange}/>
-                    </label>
-                    <input type='button' value='search' onClick={this.props.handleClick}/>
-                </div>;
+        return (
+            <div id="searchBox">
+                <Input.Search placeholder="Nome ou CPF" value={this.props.query} onChange={this.handleChange} 
+                onPressEnter={this.props.handleClick} onSearch={this.props.handleClick}/>
+            </div>
+        );
     }
 
     private handleChange(event){
@@ -38,30 +39,34 @@ class SearchResult extends React.Component<any, void>{
         this.handleClick = this.handleClick.bind(this);
     }
 
-    handleClick(id){
-        this.props.onPublicWorkerClicked(id);
+    handleClick(searchResult){
+        this.props.onPublicWorkerClicked(searchResult.id);
     }
 
+    private createTable(searchResults){
+        var state = {
+            pagination: false,
+            scroll: {y: 600}
+        };
+        var columns = [
+            { title: 'Nome', dataIndex: 'name', key: 'name', width: 150 },
+            { title: 'Órgão de Origem', dataIndex: 'originDepartment', key: 'originDepartment', width: 150 },
+            { title: 'Órgão de Exercício', dataIndex: 'workingDepartment', key: 'workingDepartment', width: 150 }
+        ];
+
+        searchResults.map(function(searchResult){
+            searchResult.key = searchResult.id;
+        });
+
+        return <Table {...state} columns={columns} dataSource={searchResults} onRowClick={this.handleClick} />
+    }
+    
     public render(){
-        return <div><h3>Resultados</h3> 
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Nome</th>
-                        <th>{'Órgão de Origem'}</th>
-                        <th>{'Órgão de Exercício'}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {this.props.publicWorkers.map(publicWorker => 
-                        <tr key={publicWorker.id} onClick={() => this.handleClick(publicWorker.id)}>
-                            <td>{publicWorker.name}</td>
-                            <td>{publicWorker.originDepartment}</td>
-                            <td>{publicWorker.workingDepartment}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table></div>;
+        return (
+            <div>
+                {this.createTable(this.props.publicWorkers)}
+            </div>
+        );
     }
 
 }
@@ -69,7 +74,8 @@ class SearchResult extends React.Component<any, void>{
 export class Search extends React.Component<any, SearchDataState>{
     constructor(){
         super();
-        this.state = {query: '', searchResult: [], loading: false, publicWorkers: [], individualProfile: false};
+        this.state = {query: '', searchResult: [], loading: false, publicWorkers: [], 
+            individualProfile: false, publicWorkerDisplayed: null};
         this.handleQueryChange = this.handleQueryChange.bind(this);
         this.handleSearchClick = this.handleSearchClick.bind(this);
         this.getPublicWorkerData = this.getPublicWorkerData.bind(this);
@@ -83,53 +89,57 @@ export class Search extends React.Component<any, SearchDataState>{
                </div>;
     } 
 
-    private handleQueryChange(newQuery) {
-        this.setState({query: newQuery, searchResult: this.state.searchResult, individualProfile: this.state.individualProfile,
-            loading: this.state.loading, publicWorkers: this.state.publicWorkers});
+    private handleQueryChange(newQuery){
+        this.setState({query: newQuery});
     }
 
     private handleSearchClick(){
-        this.setState({query: this.state.query, searchResult: this.state.searchResult, 
-            loading: true, publicWorkers: this.state.publicWorkers, individualProfile: false});
+        this.setState({loading: true});
 
         fetch('//localhost:5000/api/servidores?q=' + this.state.query)
         .then(response => response.json() as Promise<PublicWorkerData[]>)
         .then(newSearchResult => {
-            this.setState({searchResult: newSearchResult, query: this.state.query, 
-                loading: false, publicWorkers: this.state.publicWorkers, individualProfile: false});
+            this.setState({searchResult: newSearchResult, loading: false});
         });
     }
 
     private getPublicWorkerData(id){
-        fetch('//localhost:5000/api/servidores/' + id)
-        .then(response => response.json() as Promise<PublicWorkerData>)
-        .then(publicWorker => {
-            this.setState({query: this.state.query, loading: this.state.loading, individualProfile: true, 
-            searchResult: this.state.searchResult, publicWorkers: [publicWorker].concat(this.state.publicWorkers)});
-        });
+        this.setState({loading: true});
+
+        // verifies if the public worker was already retrieved
+        var pWorker = this.state.publicWorkers.filter(function(publicWorker){
+                                if (publicWorker.id == id)
+                                    return publicWorker;
+                                })[0];
+        if (pWorker != null){
+            this.setState({loading: false, individualProfile: true, publicWorkerDisplayed: pWorker});
+        }
+        else {
+            fetch('//localhost:5000/api/servidores/' + id)
+                .then(response => response.json() as Promise<PublicWorkerData>)
+                .then(publicWorker => {
+                    this.setState({loading: false, individualProfile: true, publicWorkerDisplayed: publicWorker,
+                        publicWorkers: this.state.publicWorkers.concat(publicWorker)});
+            });
+        }
     }
 
     private handleBackButton(){
-        this.setState({query: this.state.query, searchResult: this.state.searchResult, publicWorkers: this.state.publicWorkers,
-                        loading: this.state.loading, individualProfile: false});
+        this.setState({individualProfile: false});
     }
 
     private renderContent(){
+        if (this.state.loading){
+            return <Spin tip="Carregando..." />;
+        }
+
         if (this.state.individualProfile){
-            var publicWorkerData = this.state.publicWorkers[0];
-            return <PublicWorker publicWorkerData={publicWorkerData} handleBackButton={this.handleBackButton}/>
-
+            return <PublicWorker publicWorkerData={this.state.publicWorkerDisplayed} handleBackButton={this.handleBackButton}/>
         }
-        else {
-            var hasResult = this.state.searchResult.length > 0;
 
-            if (hasResult)
-                return <SearchResult publicWorkers={this.state.searchResult} 
-                                    onPublicWorkerClicked={this.getPublicWorkerData}/>;
-            else {
-                if (this.state.loading)
-                    return <p><em>Loading...</em></p>;
-            }
-        }
+        var hasResult = this.state.searchResult.length > 0;
+        if (hasResult)
+            return <SearchResult publicWorkers={this.state.searchResult} 
+                                onPublicWorkerClicked={this.getPublicWorkerData} />;
     }
 }

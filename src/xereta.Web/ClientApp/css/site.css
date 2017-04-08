@@ -1,3 +1,15 @@
+#searchBox {
+    width: 400px;
+}
+
+.ant-card {
+    width: 400px;
+}
+
+div.salaryDisplay {
+    float: left;
+}
+
 .main-nav li .glyphicon {
     margin-right: 10px;
 }

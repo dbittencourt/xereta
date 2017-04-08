@@ -4,6 +4,7 @@
     "moduleResolution": "node",
     "target": "es6",
     "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "skipDefaultLibCheck": true,
     "paths": {
